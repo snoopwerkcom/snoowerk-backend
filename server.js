@@ -1,37 +1,35 @@
-const API_BASE = "https://snoopwerkcom-production.up.railway.app";
+import express from "express";
+import cors from "cors";
 
-/**
- * Fetch user credits
- */
-export async function fetchCredits() {
-  const res = await fetch(`${API_BASE}/user/credits`);
+console.log("SERVER.JS BOOTED");
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch credits");
-  }
+const app = express();
+const port = process.env.PORT || 8080;
 
-  return res.json();
-}
+/* ===== Middleware ===== */
+app.use(cors());
+app.use(express.json());
 
-/**
- * Generate AI image
- */
-export async function generateAIImage(
-  prompt: string,
-  aspectRatio: string = "1:1"
-) {
-  const res = await fetch(`${API_BASE}/ai/generate-image`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ prompt, aspectRatio }),
+/* ===== Health / Credits ===== */
+app.get("/api/v1/user/credits", (req, res) => {
+  res.status(200).json({
+    remaining: 10,
+    total: 10,
   });
+});
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "Server error");
-  }
+/* ===== Generate Image (TEST ENDPOINT) ===== */
+app.post("/ai/generate-image", (req, res) => {
+  console.log("CONNECTED: POST /ai/generate-image");
+  console.log("BODY:", req.body);
 
-  return res.json();
-}
+  res.status(200).json({
+    imageUrl: "https://via.placeholder.com/512",
+    credits: { remaining: 9 },
+  });
+});
+
+/* ===== Start Server ===== */
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
